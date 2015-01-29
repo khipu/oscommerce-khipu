@@ -18,7 +18,7 @@ activarlo.
   
 Luego, en la de administración de OSCommerce debes ir a módulos y luego a módulos de pago. Debes activer el nuevo módulo "Transferencia bancaria".
   
-Finalmente, dentro de la configuración del módulo, se deben incluir el ID de cobrador y la llave o "secret" (obtenibles desde https://khipu.com en Opciones de la cuenta de cobro).
+Finalmente, dentro de la configuración del módulo, se deben incluir el _ID de cobrador_ y la _llave de cobrador_ o _secret_ (obtenibles desde https://khipu.com en Opciones de la cuenta de cobro).
 
 ## Como reportar problemas o ayudar al desarrollo
 
