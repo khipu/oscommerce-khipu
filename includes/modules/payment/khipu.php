@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 class khipu {
 	function khipu() {
@@ -8,7 +8,7 @@ class khipu {
 		$this->description = 'khipu payment system';
 		$this->enabled = true;
 		$this->sort_order = MODULE_PAYMENT_KHIPU_SORT_ORDER;
-		$this->form_action_url =  'https://khipu.com/api/1.3/createPaymentPage';
+        $this->form_action_url = tep_href_link('ext/modules/payment/khipu/redirect.php', '', 'SSL');
 	}
 
 	function check() {
@@ -265,56 +265,42 @@ class khipu {
 
 	      return false;
 	}
+
+    function process_button() {
+
+        global $order, $currencies, $customer_id, $cartID, $khipu_cart_ID;
+
+        // Llenamos los parametros
+        $description = '';
+        foreach ($order->products as $product) {
+            $description .= $product['qty'] . ' x ' . $product['name'] . ', ';
+        }
+        $description = substr( $description,0, -2 );
+
+        $subject = 'Compra en ' . STORE_NAME;
+        $body = $description;
+        $notify_url = tep_href_link('ext/modules/payment/khipu/notify.php', '', 'SSL');
+        $return_url = tep_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL');//MODULE_PAYMENT_RETURN_URL;
+        $transaction_id = $khipu_cart_ID;
+        $payer_email = $order->customer['email_address'];
+
+        $ret = tep_draw_hidden_field('subject', $subject);
+        $ret .= tep_draw_hidden_field('body', $body);
+        $ret .= tep_draw_hidden_field('return_url', $return_url);
+        $ret .= tep_draw_hidden_field('notify_url', $notify_url);
+        $ret .= tep_draw_hidden_field('payer_email', $payer_email);
+        $ret .= tep_draw_hidden_field('transaction_id', $transaction_id);
+        $ret .= tep_draw_hidden_field('api_version', '1.3');
+
+
+        $payment_data['a'] = 'b';
+        tep_session_register('payment_data');
+
+        return $ret;
+
+
+    }
 	
-	function process_button() {
-		global $order, $currencies, $customer_id, $cartID, $khipu_cart_ID;
-
-		// Llenamos los parametros
-		$description = '';
-		foreach ($order->products as $product) {
-		$description .= $product['qty'] . ' x ' . $product['name'] . ', ';
-		}
-		$description = substr( $description,0, -2 );
-
-		$receiver_id = MODULE_PAYMENT_KHIPU_CLIENT_ID;
-		$subject = 'Compra en ' . STORE_NAME;
-		$body = $description;
-		$amount = (int)$order->info['total'];
-		$khipu_url = 'https://khipu.com/api/1.3/createPaymentPage'; 
-		$notify_url = tep_href_link('ext/modules/payment/khipu/notify.php', '', 'SSL');
-		$return_url = tep_href_link(FILENAME_CHECKOUT_PROCESS, '', 'SSL');//MODULE_PAYMENT_RETURN_URL;
-		$cancel_url = '';
-		$bank_id = '';
-		$transaction_id = $khipu_cart_ID;
-		$payer_email = $order->customer['email_address'];
-		$picture_url = '';
-		$secret = MODULE_PAYMENT_KHIPU_CLIENT_SECRET;
-		$custom = '' ;
-
-		// creamos el hash
-		$concatenated = "receiver_id=$receiver_id&subject=$subject&body=$body&amount=$amount&payer_email=$payer_email&bank_id=$bank_id&expires_date=&transaction_id=$transaction_id&custom=$custom&notify_url=$notify_url&return_url=$return_url&cancel_url=$cancel_url&picture_url=$picture_url";
-
-
-		$hash = hash_hmac('sha256', $concatenated , $secret);
-
-
-		$ret  = tep_draw_hidden_field('cmd', '_xclick');
-		$ret .= tep_draw_hidden_field('receiver_id', $receiver_id);
-		$ret .= tep_draw_hidden_field('subject', $subject);
-		$ret .= tep_draw_hidden_field('body', $body);
-		$ret .= tep_draw_hidden_field('amount', $amount);
-		$ret .= tep_draw_hidden_field('payer_email', $payer_email);
-		$ret .= tep_draw_hidden_field('bank_id', $bank_id);
-		$ret .= tep_draw_hidden_field('notify_url', $notify_url);
-		$ret .= tep_draw_hidden_field('return_url', $return_url);
-		$ret .= tep_draw_hidden_field('cancel_url', $cancel_url);
-		$ret .= tep_draw_hidden_field('custom', $custom);
-		$ret .= tep_draw_hidden_field('transaction_id', $transaction_id );
-		$ret .= tep_draw_hidden_field('picture_url',$picture_url);
-		$ret .= tep_draw_hidden_field('hash',$hash) ;
-
-		return $ret;
-	}
 
 	function before_process() {
 		global $customer_id, $order, $order_totals, $sendto, $billto, $languages_id, $payment, $currencies, $cart, $khipu_cart_ID;

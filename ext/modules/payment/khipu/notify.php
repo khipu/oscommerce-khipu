@@ -1,77 +1,52 @@
 <?php
 chdir('../../../../');
+require __DIR__ . '/../../../../ext/vendor/autoload.php';
 require('includes/application_top.php');
 include(DIR_WS_LANGUAGES . $language . '/' . FILENAME_CHECKOUT_PROCESS);
 require(DIR_WS_CLASSES . 'payment.php');
+require(DIR_WS_CLASSES . 'order.php');
 $payment_modules = new payment(khipu_notify);
 $my_receiver_id =  MODULE_PAYMENT_KHIPU_CLIENT_ID;
 $secret = MODULE_PAYMENT_KHIPU_CLIENT_SECRET;
 
-// Leer los parametros enviados por khipu
-$api_version = $_POST['api_version'];
 
-$valid_notification = false;
-if ($api_version == '1.3') {
-	$notification_token = $_POST['notification_token'];
+if($_POST['api_version'] == '1.3') {
+    $configuration = new Khipu\Configuration();
+    $configuration->setSecret($secret);
+    $configuration->setReceiverId($my_receiver_id);
+    $configuration->setPlatform('oscommerce-khipu', '2.4.0');
 
-	$concatenated = "receiver_id=$my_receiver_id&notification_token=$notification_token";
-	$hash = hash_hmac('sha256', $concatenated , $secret);
-	$url = 'https://khipu.com/api/1.3/getPaymentNotification';
-	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, 'https://khipu.com/api/1.3/getPaymentNotification');
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_POST, true);
+    $client = new Khipu\ApiClient($configuration);
+    $payments = new Khipu\Client\PaymentsApi($client);
 
-	$data = array('receiver_id' => $my_receiver_id , 'notification_token' => $notification_token , 'hash' => $hash);
 
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-	$output = curl_exec($ch);
-	$info = curl_getinfo($ch);
-	curl_close($ch);
+    $paymentsResponse =  $payments->paymentsGet($_POST['notification_token']);
 
-	$notification = json_decode($output);
+    if ($paymentsResponse->getReceiverId() != $my_receiver_id) {
+        print 'rejected - Wrong receiver';
+        exit(0);
+    }
 
-	if($notification->receiver_id == $my_receiver_id) {
-		$valid_notification = true;
-	}
-	$transaction_id = $notification->transaction_id;
-} else if ($api_version == '1.2') {
-	$receiver_id = $_POST['receiver_id'];
-	$notification_id = $_POST['notification_id'];
-	$subject = $_POST['subject'];
-	$amount = $_POST['amount'];
-	$currency = $_POST['currency'];
-	$custom = $_POST['custom'];
-	$transaction_id = $_POST['transaction_id'];
-	$payer_email = $_POST['payer_email'];
+    $transaction_id = $paymentsResponse->getTransactionId();
 
-	// La firma digital enviada por khipu
-	$notification_signature = $_POST['notification_signature'];
-			
-	// Creamos el string para enviar
-	// Todos los parametros debene enviarse en este mismo orden
-	$to_send = 'api_version='.urlencode($api_version).
-		'&receiver_id='.urlencode($receiver_id).
-		'&notification_id='.urlencode($notification_id).
-		'&subject='.urlencode($subject).
-		'&amount='.urlencode($amount).
-		'&currency='.urlencode($currency).
-		'&transaction_id='.urlencode($transaction_id).
-		'&payer_email='.urlencode($payer_email).
-		'&custom='.urlencode($custom);
+    $order_id = substr($transaction_id, strpos($transaction_id, '-')+1);
+    $order = new order();
+    $order->order($order_id);
+    $order_total_query = tep_db_query("select value from " . TABLE_ORDERS_TOTAL . " where orders_id = '" . (int)$order_id . "' and class = 'ot_total'");
+    $order_total = tep_db_fetch_array($order_total_query);
+    if($order->info['currency'] != $paymentsResponse->getCurrency() || $paymentsResponse->getAmount() != $order_total['value'] ) {
+        print 'rejected - Wrong amount';
+        exit(0);
+    }
 
-	// Usamos CURL para hacer POST HTTP
-	$ch = curl_init("https://khipu.com/api/1.3/verifyPaymentNotification");
-	curl_setopt($ch, CURLOPT_HEADER, 0);
-	curl_setopt($ch, CURLOPT_POST, 1);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $to_send."&notification_signature=".urlencode($notification_signature));
-	$response = curl_exec($ch);		  
-	curl_close($ch); 
-	if ($response == 'VERIFIED' && $receiver_id == $my_receiver_id) {
-		$valid_notification = true;
-	}
+    $valid_notification = true;
+
+
+} else {
+    print 'rejected - invalid api version';
+    exit(0);
 }
+
 
 if ($valid_notification) {
 	$invoice = substr($transaction_id, strpos($transaction_id, '-')+1);
