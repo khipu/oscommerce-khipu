@@ -2,7 +2,6 @@
 chdir('../../../../');
 require __DIR__ . '/../../../../ext/vendor/autoload.php';
 require('includes/application_top.php');
-include(DIR_WS_LANGUAGES . $language . '/' . FILENAME_CHECKOUT_PROCESS);
 require(DIR_WS_CLASSES . 'payment.php');
 require(DIR_WS_CLASSES . 'order.php');
 $payment_modules = new payment(khipu_notify);
@@ -12,7 +11,7 @@ $secret = MODULE_PAYMENT_KHIPU_CLIENT_SECRET;
 $configuration = new Khipu\Configuration();
 $configuration->setSecret($secret);
 $configuration->setReceiverId($receiver_id);
-$configuration->setPlatform('oscommerce-khipu', '2.4.0');
+$configuration->setPlatform('oscommerce-khipu', '2.4.1');
 
 $client = new Khipu\ApiClient($configuration);
 $payments = new Khipu\Client\PaymentsApi($client);
