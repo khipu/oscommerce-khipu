@@ -13,7 +13,7 @@ if($_POST['api_version'] == '1.3') {
     $configuration = new Khipu\Configuration();
     $configuration->setSecret($secret);
     $configuration->setReceiverId($my_receiver_id);
-    $configuration->setPlatform('oscommerce-khipu', '2.4.1');
+    $configuration->setPlatform('oscommerce-khipu', '2.4.2');
 
     $client = new Khipu\ApiClient($configuration);
     $payments = new Khipu\Client\PaymentsApi($client);
@@ -33,6 +33,12 @@ if($_POST['api_version'] == '1.3') {
     $order->order($order_id);
     $order_total_query = tep_db_query("select value from " . TABLE_ORDERS_TOTAL . " where orders_id = '" . (int)$order_id . "' and class = 'ot_total'");
     $order_total = tep_db_fetch_array($order_total_query);
+
+    if( $paymentsResponse->getStatus() != 'done') {
+        print 'rejected - payment not done';
+        exit(0);
+    }
+
     if($order->info['currency'] != $paymentsResponse->getCurrency() || $paymentsResponse->getAmount() != $order_total['value'] ) {
         print 'rejected - Wrong amount';
         exit(0);

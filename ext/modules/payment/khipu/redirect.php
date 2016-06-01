@@ -11,7 +11,7 @@ $secret = MODULE_PAYMENT_KHIPU_CLIENT_SECRET;
 $configuration = new Khipu\Configuration();
 $configuration->setSecret($secret);
 $configuration->setReceiverId($receiver_id);
-$configuration->setPlatform('oscommerce-khipu', '2.4.1');
+$configuration->setPlatform('oscommerce-khipu', '2.4.2');
 
 $client = new Khipu\ApiClient($configuration);
 $payments = new Khipu\Client\PaymentsApi($client);
