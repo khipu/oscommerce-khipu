@@ -11,7 +11,7 @@ $secret = MODULE_PAYMENT_KHIPU_CLIENT_SECRET;
 $configuration = new Khipu\Configuration();
 $configuration->setSecret($secret);
 $configuration->setReceiverId($receiver_id);
-$configuration->setPlatform('oscommerce-khipu', '2.4.3');
+$configuration->setPlatform('oscommerce-khipu', '2.5.0');
 
 $client = new Khipu\ApiClient($configuration);
 $payments = new Khipu\Client\PaymentsApi($client);
@@ -24,28 +24,21 @@ $order_total = tep_db_fetch_array($order_total_query);
 
 $currencies = new currencies();
 
+$options = array(
+    "transaction_id" => $_POST['transaction_id']
+    , "body" => $_POST['body']
+    , "return_url" => $_POST['return_url']
+    , "notify_url" => $_POST['notify_url']
+    , "api_version" => $_POST['api_version']
+    , "payer_email" => $_POST['payer_email']
+);
+
 try {
     $createPaymentResponse = $payments->paymentsPost(
         $_POST['subject']
         , $order->info['currency']
         , number_format($order_total['value'],$currencies->currencies[$order->info['currency']]['decimal_places'],"." , "")
-        , $_POST['transaction_id']
-        , null
-        , $_POST['body']
-        , null
-        , $_POST['return_url']
-        , null
-        , null
-        , $_POST['notify_url']
-        , $_POST['api_version']
-        , null
-        , null
-        , null
-        , $_POST['payer_email']
-        , null
-        , null
-        , null
-        , null
+        , $options
     );
 } catch (\Khipu\ApiException $e) {
     echo "<html><head><meta charset=\"UTF-8\"></head><body>";

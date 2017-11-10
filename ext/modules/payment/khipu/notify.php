@@ -13,7 +13,7 @@ if($_POST['api_version'] == '1.3') {
     $configuration = new Khipu\Configuration();
     $configuration->setSecret($secret);
     $configuration->setReceiverId($my_receiver_id);
-    $configuration->setPlatform('oscommerce-khipu', '2.4.3');
+    $configuration->setPlatform('oscommerce-khipu', '2.5.0');
 
     $client = new Khipu\ApiClient($configuration);
     $payments = new Khipu\Client\PaymentsApi($client);

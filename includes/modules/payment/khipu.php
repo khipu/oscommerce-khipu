@@ -3,7 +3,7 @@
 class khipu {
 	function khipu() {
 		global $order;
-		$this->title = 'Transferencia bancaria <img src="https://s3.amazonaws.com/static.khipu.com/buttons/50x25.png">';		
+		$this->title = 'Khipu <img src="https://s3.amazonaws.com/static.khipu.com/buttons/50x25.png">';
 		$this->code = 'khipu';
 		$this->description = 'khipu payment system';
 		$this->enabled = true;
