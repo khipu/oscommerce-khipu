@@ -13,7 +13,7 @@ Esta extensión es compatible con [OSCommerce](http://oscommerce.com/) 2.3.x. OS
 
 Puedes revisar una [guía online](https://khipu.com/page/oscommerce) de como instalar esta extensión.
 
-Se debes descomprimir el archiveo .zip dentro del directorio *catalog* de tu instalación de OSCommerce. Con esto el módulo estará disponible para
+Se debes descomprimir el archivo .zip dentro del directorio *catalog* de tu instalación de OSCommerce. Con esto el módulo estará disponible para
 activarlo.
   
 Luego, en la de administración de OSCommerce debes ir a módulos y luego a módulos de pago. Debes activer el nuevo módulo "Transferencia bancaria".
