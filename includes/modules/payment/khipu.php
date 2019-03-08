@@ -5,7 +5,7 @@ class khipu {
 		global $order;
 		$this->title = 'Khipu <img src="https://s3.amazonaws.com/static.khipu.com/buttons/50x25.png">';
 		$this->code = 'khipu';
-		$this->description = 'khipu payment system';
+		$this->description = 'khipu payment system v2.6.0';
 		$this->enabled = true;
 		$this->sort_order = MODULE_PAYMENT_KHIPU_SORT_ORDER;
         $this->form_action_url = tep_href_link('ext/modules/payment/khipu/redirect.php', '', 'SSL');

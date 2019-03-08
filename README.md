@@ -28,9 +28,10 @@ El sitio oficial de esta extensión es su [página en github.com](https://github
 
 Se incluye un shell-script  de linux para empaquetar esta extensión. Debes ejecutar:
 
-$ ./build.sh
+$ ./package.sh
+
+Esto genera un paquete para ser instalado en OSCommerce, como dist/khipu.zip.
 
 ## Licencia GPL
 
 Esta extensión se distribuye bajo los términos de la licencia GPL versión 3. Puedes leer el archivo license.txt con los detalles de la licencia.
-
